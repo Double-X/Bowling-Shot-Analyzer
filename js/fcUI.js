@@ -1,30 +1,23 @@
 const FCUI = {
-    setFrameRate: ({ target }) => {
-        FMFrameRateStartEndTime.FrameRate = target.value;
+    setFrameRate: ({ target }) => FMCP.FrameRate = target.value,
+    loadGraph: async fileInput => {
+        const onFail = FCUI._onLoadFail, files_ = fileInput.srcElement.files;
+        if (!files_) return onFail("No graph to be loaded");
+        const file = files_[0];
+        const dataURL = await FMGraphVideo.dataURL(file).catch(onFail);
+        console.log(dataURL)
     },
     loadVideo: async fileInput => {
-        const files_ = fileInput.srcElement.files;
-        const onFail = FCUI._onLoadVideoFail;
-        if (!files_) return FCUI._onLoadVideoFail("No video to be loaded");
-        const arrayBuffer = await FMVideo.arrayBuffer(files_[0]).catch(onFail);
+        const onFail = FCUI._onLoadFail, files_ = fileInput.srcElement.files;
+        if (!files_) return onFail("No video to be loaded");
+        const file = files_[0];
+        const arrayBuffer = await FMGraphVideo.arrayBuffer(file).catch(onFail);
         const videoPlayer = document.getElementById("videoPlayer");
         videoPlayer.src = URL.createObjectURL(new Blob([arrayBuffer]));
     },
-    _onLoadVideoFail: message => {
+    _onLoadFail: message => {
         alert(message);
         console.error(message);
-    },
-    resizeVideo: () => {
-        const videoPlayer = document.getElementById("videoPlayer");
-        const { videoWidth, videoHeight } = videoPlayer;
-        const ratio = videoWidth * 1.0 / videoHeight;
-        const { width, height } = window.screen;
-        const cp = document.getElementById("cp");
-        const maxHeight = height - cp.offsetHeight;
-        const tempWidth = Math.min(videoWidth, width);
-        const newHeight = Math.floor(Math.min(tempWidth / ratio, maxHeight));
-        videoPlayer.height = newHeight;
-        videoPlayer.width = Math.floor(newHeight * ratio);
     },
     setCurrentFrame: ({ target }) => {
         const videoPlayer = document.getElementById("videoPlayer");
@@ -41,6 +34,38 @@ const FCUI = {
         document.getElementById("currentFrame").value = currentFrame;
     },
     setStartEndTime: (startEnd, unit, { target }) => {
-        FMFrameRateStartEndTime[startEnd][unit] = target.value;
+        FMCP[startEnd][unit] = target.value;
+    },
+    tryGetRGB: type => {
+        FMCP.clearRGBFlags();
+        FMCP.IsGetRGB[type] = true;
+        FVVideoPlayer.showAnalyzer();
+    },
+    tryGetLaneCornerPosition: (horizontal, vertical) => {
+        FMCP.clearLaneCornerFlags();
+        FMCP.IsGetLaneCorner[horizontal][vertical] = true;
+        FVVideoPlayer.showAnalyzer();
+    },
+    clickVideoAnalyzer: ({ pageX, pageY }) => {
+        const type_ = FMCP.rgbType_();
+        if (type_) return FCUI._getRGB(pageX, pageY, type_);
+        const [horizontal_, vertical_] = FMCP.laneCornerPosition_();
+        if (horizontal_ && vertical_) FCUI._getLaneCornerPosition(pageX, pageY, horizontal_, vertical_);
+    },
+    _getRGB: (pageX, pageY, type) => {
+        const rgb = FVVideoPlayer.rgb(pageX, pageY);
+        const input = document.getElementById(`rgb${type}Input`);
+        input.value = FMCP.RGB[type] = rgb;
+        input.style.color = `#${input.value}`;
+        FMCP.clearRGBFlags();
+        FVVideoPlayer.hideAnalyzer();
+    },
+    _getLaneCornerPosition: (pageX, pageY, horizontal, vertical) => {
+        const xy = FMCP.LaneCornerPosition[horizontal][vertical];
+        [xy.x, xy.y] = FVVideoPlayer.laneCornerPosition(pageX, pageY);
+        const text = document.getElementById(`corner${horizontal}${vertical}`);
+        text.innerHTML = `x - ${xy.x} / y - ${xy.y}`;
+        FMCP.clearLaneCornerFlags();
+        FVVideoPlayer.hideAnalyzer();
     }
 };
