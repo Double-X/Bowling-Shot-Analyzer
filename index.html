@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Bowling Shot Analyzer</title>
+        <link rel="stylesheet" href="graph.css">
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -25,6 +26,12 @@
         <script type="text/javascript">
             window.onload = () => FVUI.load();
         </script>
-        <div id="ui"><div id="cp"></div><div id="video"></div></div>
+        <div id="ui">
+            <div id="graph" class="graph"></div>
+            <div id="videoCP" class="container">
+                <div id="cp" class="container"></div>
+                <div id="video" class="container"></div>
+            </div>
+        </div>
     </body>
 </html>
