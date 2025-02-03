@@ -11,7 +11,7 @@ const FVVideoLoader = {
     },
     _textLabel: () => {
         const label = document.createElement("label");
-        label.innerHTML = "Frame Rate: ";
+        label.innerHTML = "Frame Rate:";
         return label;
     },
     _text: () => {
@@ -23,7 +23,7 @@ const FVVideoLoader = {
     },
     _fileLabel: () => {
         const label = document.createElement("label");
-        label.innerHTML = "Load Video: ";
+        label.innerHTML = "Load Video:";
         return label;
     },
     _file: () => {
@@ -34,13 +34,12 @@ const FVVideoLoader = {
     },
     _currentFrameLabel: () => {
         const label = document.createElement("label");
-        label.innerHTML = "Current Frame: ";
+        label.innerHTML = "Current Frame:";
         return label;
     },
     _currentFrame: () => {
         const input = document.createElement("input");
-        input.id = "currentFrame", input.value = 0;
-        input.style.width = "3ch";
+        input.id = "currentFrame", input.value = 0, input.style.width = "3ch";
         input.type = "text", input.onchange = FCUI.setCurrentFrame;
         return input;
     }

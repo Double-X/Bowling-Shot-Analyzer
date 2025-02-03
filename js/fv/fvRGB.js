@@ -9,7 +9,7 @@ const FVRGB = {
     },
     _button: type => {
           const button = document.createElement("button");
-          button.innerHTML = `${type} RGB: `;
+          button.innerHTML = `${type} RGB:`;
           button.onclick = FCUI.tryGetRGB.bind(null, type.replace(/ +/, ""));
           return button;
     },

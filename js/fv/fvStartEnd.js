@@ -10,7 +10,7 @@ const FVStartEnd = {
     },
     _text: startEnd => {
         const text = document.createElement("text");
-        text.innerHTML = `${startEnd} Time: `;
+        text.innerHTML = `${startEnd} Time:`;
         return text;
     },
     _label: unit => {

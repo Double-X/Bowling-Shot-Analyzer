@@ -7,7 +7,7 @@ const FVGraphLoader = {
     },
     _label: () => {
         const label = document.createElement("label");
-        label.innerHTML = "Load Graph: ";
+        label.innerHTML = "Load Graph:";
         return label;
     },
     _file: () => {

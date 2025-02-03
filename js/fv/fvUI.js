@@ -10,5 +10,8 @@ const FVUI = {
         const video = document.getElementById("video");
         video.appendChild(FVVideoPlayer.video());
         video.appendChild(FVVideoPlayer.canvas());
+        const graph = document.getElementById("graph");
+        graph.appendChild(FVGraph.img());
+        graph.appendChild(FVGraph.canvas());
     }
 };

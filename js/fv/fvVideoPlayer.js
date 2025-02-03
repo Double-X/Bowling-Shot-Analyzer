@@ -13,6 +13,16 @@ const FVVideoPlayer = {
         canvas.getContext("2d").willReadFrequently = true;
         return canvas;
     },
+    load: arrayBuffer => {
+        const videoPlayer = document.getElementById("videoPlayer");
+        videoPlayer.src = URL.createObjectURL(new Blob([arrayBuffer]));
+    },
+    setCurrentFrame: (frameRate, currentFrame) => {
+        const videoPlayer = document.getElementById("videoPlayer");
+        const { currentTime } = videoPlayer;
+        const timeOffset = currentFrame * 1.0 / frameRate;
+        videoPlayer.currentTime = Math.floor(currentTime) + timeOffset;
+    },
     showAnalyzer: () => {
         const videoPlayer = document.getElementById("videoPlayer");
         videoPlayer.hidden = true;
@@ -39,7 +49,7 @@ const FVVideoPlayer = {
             return rgb + (hex.length <= 1 ? "0" + hex : hex);
         }, "");
     },
-    laneCornerPosition: (pageX, pageY) => {
+    laneCornerXY: (pageX, pageY) => {
         const cp = document.getElementById("cp");
         return [pageX - cp.offsetLeft, pageY - FVVideoPlayer._heightOffset(cp)];
     },
@@ -56,6 +66,7 @@ const FVVideoPlayer = {
         const videoAnalyzer = document.getElementById("videoAnalyzer");
         videoPlayer.width = videoAnalyzer.width = newWidth;
         videoPlayer.height = videoAnalyzer.height = newHeight;
+        FVGraph.resize();
     },
     _heightOffset: cp => cp.offsetHeight + cp.offsetTop * 2
 };
