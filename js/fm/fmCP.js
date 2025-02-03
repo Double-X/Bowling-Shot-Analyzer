@@ -8,13 +8,13 @@ const FMCP = {
         Left: { Foul: false, Pin: false },
         Right: { Foul: false, Pin: false }
     },
-    LaneCornerPosition: {
+    LaneCornerXY: {
         Left: { Foul: { x: 0, y: 0 }, Pin: { x: 0, y: 0 } },
         Right: { Foul: { x: 0, y: 0 }, Pin: { x: 0, y: 0 } }
     },
     clearRGBFlags : () => {
         const { IsGetRGB } = FMCP;
-        IsGetRGB.Ball = IsGetRGBCoreDot = false;
+        IsGetRGB.Ball = IsGetRGB.CoreDot = false;
     },
     clearLaneCornerFlags: () => {
         const { IsGetLaneCorner } = FMCP;
@@ -29,8 +29,8 @@ const FMCP = {
         const { IsGetRGB } = FMCP;
         return Object.keys(IsGetRGB).find(type => IsGetRGB[type]);
     },
-    laneCornerPosition_: () => {
-        const { IsGetLaneCorner, LaneCornerPosition } = FMCP;
+    laneCornerXY_: () => {
+        const { IsGetLaneCorner, LaneCornerXY } = FMCP;
         const horizontal_ = Object.keys(IsGetLaneCorner).find(horizontal => {
             const verticals = IsGetLaneCorner[horizontal];
             return Object.keys(verticals).some(vertical => verticals[vertical]);
