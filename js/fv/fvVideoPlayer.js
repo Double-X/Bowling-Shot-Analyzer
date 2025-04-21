@@ -23,6 +23,12 @@ const FVVideoPlayer = {
         const timeOffset = currentFrame * 1.0 / frameRate;
         videoPlayer.currentTime = Math.floor(currentTime) + timeOffset;
     },
+    isPlaying: () => {
+        const videoPlayer = document.getElementById("videoPlayer");
+        if (videoPlayer.currentTime <= 0) return false;
+        if (videoPlayer.paused || videoPlayer.ended) return false;
+        return !videoPlayer.seeking && videoPlayer.readyState > 2;
+    },
     showAnalyzer: () => {
         const videoPlayer = document.getElementById("videoPlayer");
         videoPlayer.hidden = true;
@@ -53,6 +59,30 @@ const FVVideoPlayer = {
         const cp = document.getElementById("cp");
         return [pageX - cp.offsetLeft, pageY - FVVideoPlayer._heightOffset(cp)];
     },
+    play: startTime => {
+        const videoPlayer = document.getElementById("videoPlayer");
+        videoPlayer.currentTime = startTime;
+        videoPlayer.play();
+    },
+    imageData: (x, y, w, h) => {
+        const videoPlayer = document.getElementById("videoPlayer");
+        const videoAnalyzer = document.getElementById("videoAnalyzer");
+        const context = videoAnalyzer.getContext("2d");
+        context.clearRect(0, 0, videoAnalyzer.width, videoAnalyzer.height);
+        const vx = x * videoPlayer.videoWidth * 1.0 / videoAnalyzer.width;
+        const vy = y * videoPlayer.videoHeight * 1.0 / videoAnalyzer.height;
+        const vw = w * videoPlayer.videoWidth * 1.0 / videoAnalyzer.width;
+        const vh = h * videoPlayer.videoHeight * 1.0 / videoAnalyzer.height;
+        context.drawImage(videoPlayer, vx, vy, vw, vh, 0, 0, w, h);
+        return context.getImageData(0, 0, w + 1, h + 1).data;
+    },
+    clearCanvas: () => {
+        const videoAnalyzer = document.getElementById("videoAnalyzer");
+        const context = videoAnalyzer.getContext("2d");
+        context.clearRect(0, 0, videoAnalyzer.width, videoAnalyzer.height);
+        videoAnalyzer.hidden = true;
+        document.getElementById("videoPlayer").hidden = false;
+    },
     _resize: () => {
         const videoPlayer = document.getElementById("videoPlayer");
         const { videoWidth, videoHeight } = videoPlayer;
@@ -66,7 +96,7 @@ const FVVideoPlayer = {
         const videoAnalyzer = document.getElementById("videoAnalyzer");
         videoPlayer.width = videoAnalyzer.width = newWidth;
         videoPlayer.height = videoAnalyzer.height = newHeight;
-        FVGraph.resize();
+        FCUI.didResizeVideo();
     },
     _heightOffset: cp => cp.offsetHeight + cp.offsetTop * 2
 };

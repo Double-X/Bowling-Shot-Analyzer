@@ -1,24 +1,18 @@
 const FVLaneCorners = {
     p: () => {
         const p = document.createElement("p");
-        ["Left", "Right"].forEach(horizontal => {
-            ["Foul", "Pin"].forEach(vertical => {
-                p.appendChild(FVLaneCorners._button(horizontal, vertical));
-                p.appendChild(FVLaneCorners._text(horizontal, vertical));
+        ["Left", "Right"].forEach(h => {
+            ["Foul", "Pin"].forEach(v => {
+                const innerHTML = `Lane ${h} ${v} Corner xy:`;
+                const onclick = FCUI.tryGetLaneCornerXY.bind(null, h, v);
+                p.appendChild(FVDOM.button(innerHTML, onclick));
+                p.appendChild(FVDOM.text("x0y0", `corner${h}${v}`));
             });
         });
         return p;
     },
-    _button: (horizontal, vertical) => {
-        const button = document.createElement("button");
-        button.onclick = FCUI.tryGetLaneCornerXY.bind(null, horizontal, vertical);
-        button.innerHTML = `Lane ${horizontal} ${vertical} Corner xy:`;
-        return button;
-    },
-    _text: (horizontal, vertical) => {
-        const text = document.createElement("text");
-        text.id = `corner${horizontal}${vertical}`;
-        text.innerHTML = "x0y0";
-        return text;
+    update: (horizontal, vertical, x, y) => {
+        const text = document.getElementById(`corner${horizontal}${vertical}`);
+        text.innerHTML = `x${x}y${y}`;
     }
 };
