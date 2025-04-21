@@ -1,67 +1,87 @@
 const FCUI = {
     setFrameRate: ({ target }) => FMCP.FrameRate = target.value,
     loadGraph: async fileInput => {
-        const onFail = FCUI._onLoadFail, files_ = fileInput.srcElement.files;
+        const onFail = FCUI._showMessage, files_ = fileInput.srcElement.files;
         if (!files_) return onFail("No graph to be loaded");
-        const dataURL = await FMGraphVideo.dataURL(files_[0]).catch(onFail);
+        const dataURL = await FMFile.dataURL(files_[0]).catch(onFail);
         FVGraph.load(dataURL);
+        FMCP.IsLoaded.Graph = true;
     },
     loadVideo: async fileInput => {
-        const onFail = FCUI._onLoadFail, files_ = fileInput.srcElement.files;
+        const onFail = FCUI._showMessage, files_ = fileInput.srcElement.files;
         if (!files_) return onFail("No video to be loaded");
-        const file = files_[0];
-        const arrayBuffer = await FMGraphVideo.arrayBuffer(file).catch(onFail);
+        const arrayBuffer = await FMFile.arrayBuffer(files_[0]).catch(onFail);
         FVVideoPlayer.load(arrayBuffer);
     },
-    _onLoadFail: message => {
-        alert(message);
-        console.error(message);
+    didResizeVideo: () => {
+        FVGraph.resize();
+        if (FMCP.IsLoaded.Video) return;
+        FMCP.IsLoaded.Video = true;
+        setInterval(FCUI.updateAnalysis, 10);
     },
     setCurrentFrame: ({ target }) => {
         const frameRate = document.getElementById("frameRate").value;
         FVVideoPlayer.setCurrentFrame(frameRate, target.value);
     },
     updateCurrentFrame: ({ target }) => {
-        const { currentTime } = target;
-        const timeOffset = currentTime - Math.floor(currentTime);
-        const frameRate = document.getElementById("frameRate").value;
-        const currentFrame = Math.floor(timeOffset * frameRate);
-        document.getElementById("currentFrame").value = currentFrame;
+        FVVideoLoader.updateCurrentFrame(target.currentTime);
+    },
+    updateAnalysis: () => {
+        if (!FVVideoPlayer.isPlaying()) return;
+        const { currentTime } = document.getElementById("videoPlayer");
+        FVVideoLoader.updateCurrentFrame(currentTime);
+        const end_ = FMCP.AnalyzedInterval.End;
+        if (!end_ || currentTime > end_) return;
+        const { x, y, w, h } = FMCP.laneXYWH();
+        const imageData = FVVideoPlayer.imageData(x, y, w, h);
+        FMGraph.analyze(currentTime, x, y, w, imageData);
     },
     setStartEndTime: (startEnd, unit, { target }) => {
-        FMCP[startEnd][unit] = target.value;
-    },
-    tryGetRGB: type => {
-        FMCP.clearRGBFlags();
-        FMCP.IsGetRGB[type] = true;
-        FVVideoPlayer.showAnalyzer();
+        FMCP[startEnd][unit] = +(target.value);
     },
     tryGetLaneCornerXY: (horizontal, vertical) => {
+        if (!FMCP.IsLoaded.Video) {
+            return FCUI._showMessage("The video isn't loaded!");
+        }
         FMCP.clearLaneCornerFlags();
         FMCP.IsGetLaneCorner[horizontal][vertical] = true;
         FVVideoPlayer.showAnalyzer();
     },
     clickVideoAnalyzer: ({ pageX, pageY }) => {
-        const type_ = FMCP.rgbType_();
-        if (type_) return FCUI._getRGB(pageX, pageY, type_);
-        const [horizontal_, vertical_] = FMCP.laneCornerXY_();
+        const [horizontal_, vertical_] = FMCP.laneCornerHorizontalVertical_();
         if (!horizontal_ || !vertical_) return;
         FCUI._getLaneCornerXY(pageX, pageY, horizontal_, vertical_);
     },
-    _getRGB: (pageX, pageY, type) => {
-        const rgb = FVVideoPlayer.rgb(pageX, pageY);
-        const input = document.getElementById(`rgb${type}Input`);
-        input.value = FMCP.RGB[type] = rgb;
-        input.style.color = `#${input.value}`;
-        FMCP.clearRGBFlags();
-        FVVideoPlayer.hideAnalyzer();
+    analyze: () => {
+        if (!FMCP.IsLoaded.Graph) {
+            return FCUI._showMessage("The graph isn't loaded!");
+        } else if (!FMCP.IsLoaded.Video) {
+            return FCUI._showMessage("The video isn't loaded!");
+        }
+        FMCP.setStartEnd(document.getElementById("frameRate").value);
+        FVVideoPlayer.play(FMCP.AnalyzedInterval.Start);
+    },
+    analyzeFrame: () => { // This is for debug use only
+        const { currentTime } = document.getElementById("videoPlayer");
+        const end_ = FMCP.AnalyzedInterval.End;
+        if (!end_ || currentTime > end_) return;
+        const { x, y, w, h } = FMCP.laneXYWH();
+        const imageData = FVVideoPlayer.imageData(x, y, w, h);
+        FMGraph.analyzeFrame(currentTime, x, y, w, h, imageData);
+    },
+    clearCanvas: () => FVVideoPlayer.clearCanvas(), // This is for debug use only
+    _showMessage: message => {
+        alert(message);
+        console.error(message);
     },
     _getLaneCornerXY: (pageX, pageY, horizontal, vertical) => {
-        const xy = FMCP.LaneCornerXY[horizontal][vertical];
-        [xy.x, xy.y] = FVVideoPlayer.laneCornerXY(pageX, pageY);
-        const text = document.getElementById(`corner${horizontal}${vertical}`);
-        text.innerHTML = `x${xy.x}y${xy.y}`;
-        FMCP.clearLaneCornerFlags();
+        const [x, y] = FVVideoPlayer.laneCornerXY(pageX, pageY);
+        FMCP.updateLaneCornerXY(horizontal, vertical, x, y);
+        FVLaneCorners.update(horizontal, vertical, x, y);
         FVVideoPlayer.hideAnalyzer();
+        if (!FMCP.hasAllLaneCorners()) return;
+        const { x, y, w, h } = FMCP.laneXYWH();
+        FMCP.setImageData(FVVideoPlayer.imageData(x, y, w, h));
+        FMCP.setLaneBounds();
     }
 };
