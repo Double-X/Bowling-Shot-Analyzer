@@ -48,6 +48,12 @@ const FCUI = {
         FVVideoPlayer.showAnalyzer();
     },
     clickVideoAnalyzer: ({ pageX, pageY }) => {
+        if (FMCP.isDrawPath) {
+            const [px, py] = FVVideoPlayer.laneXY(pageX, pageY);
+            const { x, y } = FMPath.ballXYRatio(px, py);
+            console.log("FCUI.clickVideoAnalyzer", "px", px, "py", py, "x", x, "y", y)
+            return FVGraph.drawPath(x, y);
+        }
         const [horizontal_, vertical_] = FMCP.laneCornerHorizontalVertical_();
         if (!horizontal_ || !vertical_) return;
         FCUI._getLaneCornerXY(pageX, pageY, horizontal_, vertical_);
@@ -67,21 +73,25 @@ const FCUI = {
         if (!end_ || currentTime > end_) return;
         const { x, y, w, h } = FMCP.laneXYWH();
         const imageData = FVVideoPlayer.imageData(x, y, w, h);
-        FMGraph.analyzeFrame(currentTime, x, y, w, h, imageData);
+        FMGraph.analyzeFrame(currentTime, x, y, w, imageData);
     },
     clearCanvas: () => FVVideoPlayer.clearCanvas(), // This is for debug use only
+    drawPath: () => { // This is for debug use only
+        FMCP.isDrawPath = true;
+        FVVideoPlayer.showAnalyzer();
+    },
     _showMessage: message => {
         alert(message);
         console.error(message);
     },
     _getLaneCornerXY: (pageX, pageY, horizontal, vertical) => {
-        const [x, y] = FVVideoPlayer.laneCornerXY(pageX, pageY);
-        FMCP.updateLaneCornerXY(horizontal, vertical, x, y);
-        FVLaneCorners.update(horizontal, vertical, x, y);
+        const [px, py] = FVVideoPlayer.laneXY(pageX, pageY);
+        FMCP.updateLaneCornerXY(horizontal, vertical, px, py);
+        FVLaneCorners.update(horizontal, vertical, px, py);
         FVVideoPlayer.hideAnalyzer();
         if (!FMCP.hasAllLaneCorners()) return;
         const { x, y, w, h } = FMCP.laneXYWH();
-        FMCP.setImageData(FVVideoPlayer.imageData(x, y, w, h));
+        FMCP.setImageData(FVVideoPlayer.imageData(x, y, w, h), w, h);
         FMCP.setLaneBounds();
     }
 };
