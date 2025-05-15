@@ -7,6 +7,7 @@ const FVGraphLoader = {
         // These are for debug use only
         p.appendChild(FVDOM.button("Analyze Frame(Debug Only)", FCUI.analyzeFrame));
         p.appendChild(FVDOM.button("Clear Canvas(Debug Only)", FCUI.clearCanvas));
+        p.appendChild(FVDOM.button("Draw Path(Debug Only)", FCUI.drawPath));
         //
         return p;
     }

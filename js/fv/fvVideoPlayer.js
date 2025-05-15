@@ -55,7 +55,7 @@ const FVVideoPlayer = {
             return rgb + (hex.length <= 1 ? "0" + hex : hex);
         }, "");
     },
-    laneCornerXY: (pageX, pageY) => {
+    laneXY: (pageX, pageY) => {
         const cp = document.getElementById("cp");
         return [pageX - cp.offsetLeft, pageY - FVVideoPlayer._heightOffset(cp)];
     },

@@ -1,4 +1,5 @@
 const FVGraph = {
+    _PATH_COLOR: new ImageData(new Uint8ClampedArray([255, 0, 0, 255]), 1, 1),
     img: () => {
         const img = document.createElement("img");
         img.id = "img", img.hidden = true;
@@ -27,5 +28,11 @@ const FVGraph = {
         const canvas = document.getElementById("analyzedResult");
         canvas.width = img.width, canvas.height = img.height;
         canvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
+    },
+    drawPath: (ballXRatio, ballYRatio) => {
+        console.log("FVGraph.drawPath", "ballXRatio", ballXRatio, "ballYRatio", ballYRatio)
+        const canvas = document.getElementById("analyzedResult");
+        const x = canvas.width * ballXRatio, y = canvas.height * ballYRatio;
+        canvas.getContext("2d").putImageData(FVGraph._PATH_COLOR, x, y);
     }
 };
