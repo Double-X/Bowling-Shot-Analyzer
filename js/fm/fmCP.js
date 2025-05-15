@@ -1,5 +1,6 @@
 const FMCP = {
     FrameRate: 120,
+    IsDrawPath: false,
     IsLoaded: { Graph: false, Video: false },
     Start: { Minute: 0, Second: 0, Frame: 0 },
     End: { Minute: 0, Second: 0, Frame: 0 },
@@ -58,9 +59,9 @@ const FMCP = {
     hasAllLaneCorners: () => Object.values(FMCP.LaneCornerXY).every(xys => {
         return Object.values(xys).every(({ x, y }) => x && y);
     }),
-    setImageData: id => {
+    setImageData: (imageData, w, h) => {
         // It's to avoid unintended image data mutation after being stored
-        LaneImageData_ = new ImageData(id.data, id.width, id.height);
+        FMCP.LaneImageData_ = new ImageData(imageData, w + 1, h + 1);
         //
     },
     setLaneBounds: () => {
